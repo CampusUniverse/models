@@ -17,8 +17,9 @@ classDiagram
 
     class EventVisibility {
         PUBLIC
-        DEPARTMENT_LIST
-        FACULTY_LIST
+        DEPARTMENT[]
+        FACULTY[]
+        PART[]
         PRIVATE
     }
 
@@ -40,11 +41,17 @@ classDiagram
         POSTPONED
     }
 
+    class CheckInMethod {
+        QR_CODE
+        MANUAL_OVERRIDE
+    }
+
 <<enumeration>> Role
 <<enumeration>> EventStatus
 <<enumeration>> EventCategory
 <<enumeration>> EventVisibility
 <<enumeration>> Part
+<<enumeration>> CheckInMethod
 ```
 
 ``` mermaid
@@ -88,6 +95,7 @@ erDiagram
         string locationId
         EventCategory category
         EventStatus status
+        string qrCodeUrl
     }
 
     Location {
@@ -105,13 +113,32 @@ erDiagram
         DateTime subscribedAt
     }
 
-    User ||--o{ Event : creates
+    EventParticipant {
+        string id
+        string userId
+        string eventId
+        DateTime joinedAt
+        boolean verified
+        CheckInMethod checkInMethod
+    }
+
+    QRCheckIn {
+        string id
+        string eventId
+        string qrCode
+        DateTime expiresAt
+    }
+
+    User ||--o{ Event : "creates"
     User ||--o{ EventSubscription : "subscribes to"
     EventSubscription }o--|| Event : "notifies about"
-    Faculty ||--o{ Department : contains
+    Faculty ||--o{ Department : "contains"
     Department }o--o{ User : "has members"
     Event }o--o{ Department : "allowed departments"
     Event }o--o{ Faculty : "allowed faculties"
     Event }|--|| Location : "occurs at"
-    Location ||--o{ Event : hosts
+    Location ||--o{ Event : "hosts"
+    Event }o--o{ EventParticipant : "has participants"
+    EventParticipant }o--o{ User : "participates"
+    Event }|--o{ QRCheckIn : "has QR codes"
 ```
